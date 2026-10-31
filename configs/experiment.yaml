@@ -1,0 +1,22 @@
+# Starter configuration. Verify all assumptions against the source project.
+project:
+  name: heatrisk-shap-analysis
+  source_repository: https://github.com/amk0098/heatrisk-deutschland
+  target: heat_day_next
+
+data:
+  feature_columns: [TMK, TXK, TNK, VPM, UPM, TXK_lag_1, TXK_rolling_3]
+  train_end: '2020-12-31'
+  validation_start: '2021-01-01'
+  validation_end: '2023-12-31'
+  test_start: '2024-01-01'
+model:
+  framework: to_be_decided
+  random_seed: 42
+  hidden_layers: [32, 16]
+  activation: relu
+explainability:
+  output: positive_class_probability
+  background_source: training_only
+  explainer: to_be_selected_after_compatibility_check
+  random_seed: 42
