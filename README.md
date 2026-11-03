@@ -4,6 +4,8 @@ A focused research project applying SHAP explainability to a Multi-Layer Percept
 
 **Source project:** https://github.com/amk0098/heatrisk-deutschland
 
+**Source project version:** commit `9974c0eb22b027d3a9ed66f89a7ecf3925d6b102` (`main`, recorded 03.11.2026)
+
 ## Research question
 Which meteorological inputs contribute to an MLP's next-day heat-day predictions, how stable are those attributions, and how do correlated weather variables limit interpretation?
 

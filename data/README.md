@@ -1,5 +1,9 @@
 # Data
 
-Do not commit large raw datasets unless licensing and repository size justify it. Follow the original HeatRisk project's data acquisition process. Document source and licence, download steps, filenames/schema, date/city coverage and missing-value handling.
+The data comes from the German Weather Service (DWD), obtained through the source project
+[amk0098/heatrisk-deutschland](https://github.com/amk0098/heatrisk-deutschland). Follow that project's
+data acquisition process.
 
-Source project: https://github.com/amk0098/heatrisk-deutschland
+**Raw data is never committed.** `data/raw/` and `data/processed/` are ignored by git; only this README is tracked.
+
+Document here: source version, download steps, filenames/schema, date/city coverage, licence and missing-value handling.
