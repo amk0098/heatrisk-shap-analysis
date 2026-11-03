@@ -2,6 +2,7 @@
 project:
   name: heatrisk-shap-analysis
   source_repository: https://github.com/amk0098/heatrisk-deutschland
+  source_version: 9974c0eb22b027d3a9ed66f89a7ecf3925d6b102  # main HEAD, recorded 2026-11-03
   target: heat_day_next
 
 data:
