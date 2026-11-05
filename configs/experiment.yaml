@@ -12,12 +12,12 @@ data:
   validation_end: '2023-12-31'
   test_start: '2024-01-01'
 model:
-  framework: to_be_decided
+  framework: pytorch  # required for DeepSHAP (seminar requirement, 05.11.2026)
   random_seed: 42
   hidden_layers: [32, 16]
   activation: relu
 explainability:
-  output: positive_class_probability
+  outputs: [logit, embedding]  # seminar requirement; 'embedding' meaning to be confirmed with supervisor
   background_source: training_only
-  explainer: to_be_selected_after_compatibility_check
+  explainers: [deepshap, kernelshap]  # plus exact Shapley (7 features) as a check
   random_seed: 42
