@@ -34,8 +34,8 @@ The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher 
 
 ## Run 2 — exact Shapley values on the logit (Step 5)
 
-- **Date:** FILL IN
-- **Code revision:** FILL IN
+- **Date:** 11.11.2026
+- **Code revision:** `d72b733`
 - **Command:** `python scripts/exact_shapley.py`
 - **Model:** `outputs/models/mlp.pt` from Run 1
 - **Background:** 100 random training days (seed 42), saved in `outputs/shap/background.npz`
@@ -45,10 +45,29 @@ The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher 
 
 | Result | Value |
 |---|---|
-| test days explained | 3650 |
-| runtime | FILL IN |
-| base value (mean logit over background) | FILL IN |
-| efficiency check (max gap) | FILL IN |
-| ranking by mean abs phi | FILL IN |
+| test days explained | 3650 (46.7 million model evaluations) |
+| runtime | 3.1 s (MacBook Air, arm64) |
+| base value (mean logit over background) | −13.25 |
+| efficiency check (max gap) | 7.6e-06 (float32 rounding of the model) |
+| ranking by mean abs phi | Max.-Temp. 2.41, Dampfdruck 2.10, Mittel-Temp. 1.96, 3-Tage-Mittel Max. 1.72, rel. Feuchte 1.48, Vortags-Max. 0.43, Min.-Temp. 0.26 |
+
+**Observations:** FILL IN (one or two sentences in your own words)
+
+## Run 3 — KernelSHAP and DeepSHAP vs exact (Step 6)
+
+- **Date:** FILL IN
+- **Code revision:** FILL IN
+- **Command:** `python scripts/shap_logit.py` (shap 0.54.1)
+- **Same model and background as Run 2.** KernelSHAP: default nsamples (2·7 + 2048, i.e. all coalitions).
+  DeepSHAP: `shap.DeepExplainer` on the PyTorch model. Convergence: KernelSHAP with 16/32/64/126 coalitions,
+  `l1_reg=False`, 300 random test days, seed 42.
+
+| Result | KernelSHAP | DeepSHAP |
+|---|---|---|
+| runtime, all 3650 test days | FILL IN | FILL IN |
+| max / mean abs deviation from exact | FILL IN | FILL IN |
+| same most important feature as exact | FILL IN | FILL IN |
+
+Waterfall days: FILL IN (detected heat day, false alarm). Temperature group mean |sum phi|: FILL IN.
 
 **Observations:** FILL IN
