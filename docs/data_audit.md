@@ -45,7 +45,8 @@ June–August hold 1 892 of 2 036 heat days (93 %).
 
 ## Feature correlation (training period, Pearson)
 
-The five temperature features correlate at 0.84–0.98 with each other (TMK–TXK 0.98, TXK_lag_1–TXK_rolling_3 0.97).
+The five temperature features correlate at 0.87–0.98 with each other (TMK–TXK 0.98, TXK_lag_1–TXK_rolling_3 0.97).
+Vapour pressure (VPM) also correlates strongly with them (0.83–0.92).
 UPM is negatively correlated with temperature (−0.29 … −0.55). This matters for the Shapley interpretation:
 the attribution will be spread across the temperature features, and KernelSHAP will evaluate the model on
 unrealistic combinations.
