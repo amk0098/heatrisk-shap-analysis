@@ -37,3 +37,4 @@ Starter project. No MLP or SHAP results yet.
 |---|---|---|
 | 03.11.2026 | Added CLAUDE.md, .gitignore, data/README.md, pinned requirements.txt, source version (heatrisk-deutschland 9974c0e), MIT LICENSE | Read-only audit of the source repo |
 | 05.11.2026 | Chosen as dataset/MLP for the seminar; seminar requirements, risks and repo role recorded in CLAUDE.md, README, config (pytorch, logit + embedding, DeepSHAP + KernelSHAP) | Clarify "embeddings" with supervisor; audit source loader |
+| 11.11.2026 | Read-only audit of source repo done (`docs/data_audit.md`): loader/target/lags/split correct, no leakage, no date gaps; positive rate 3.15 % (test 3.7 %); TXK_rolling_3 is a 3-day mean; München from 1992. Config hidden layers set to [16, 8] to match slides | Step 2: pin torch, check shap explainers |

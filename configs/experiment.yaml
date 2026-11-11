@@ -14,7 +14,7 @@ data:
 model:
   framework: pytorch  # required for DeepSHAP (seminar requirement, 05.11.2026)
   random_seed: 42
-  hidden_layers: [32, 16]
+  hidden_layers: [16, 8]  # 7-16-8-1 = 273 parameters, matches the seminar slides
   activation: relu
 explainability:
   outputs: [logit, embedding]  # seminar requirement; 'embedding' meaning to be confirmed with supervisor
