@@ -51,12 +51,15 @@ The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher 
 | efficiency check (max gap) | 7.6e-06 (float32 rounding of the model) |
 | ranking by mean abs phi | Max.-Temp. 2.41, Dampfdruck 2.10, Mittel-Temp. 1.96, 3-Tage-Mittel Max. 1.72, rel. Feuchte 1.48, Vortags-Max. 0.43, Min.-Temp. 0.26 |
 
-**Observations:** FILL IN (one or two sentences in your own words)
+**Observations:** Exact computation is cheap for 7 features (3 s for all test days). The base value is very low
+(−13.25) because most background days are winter days with logits around −25; it must not be read as a probability.
+The correlated temperature features share their effect: on single days some of them get opposite signs
+(e.g. Frankfurt 2025-07-01: Max.-Temp. +8.07, Vortags-Max. −1.07).
 
 ## Run 3 — KernelSHAP and DeepSHAP vs exact (Step 6)
 
-- **Date:** FILL IN
-- **Code revision:** FILL IN
+- **Date:** 11.11.2026
+- **Code revision:** `b80b4b1`
 - **Command:** `python scripts/shap_logit.py` (shap 0.54.1)
 - **Same model and background as Run 2.** KernelSHAP: default nsamples (2·7 + 2048, i.e. all coalitions).
   DeepSHAP: `shap.DeepExplainer` on the PyTorch model. Convergence: KernelSHAP with 16/32/64/126 coalitions,
@@ -64,10 +67,18 @@ The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher 
 
 | Result | KernelSHAP | DeepSHAP |
 |---|---|---|
-| runtime, all 3650 test days | FILL IN | FILL IN |
-| max / mean abs deviation from exact | FILL IN | FILL IN |
-| same most important feature as exact | FILL IN | FILL IN |
+| runtime, all 3650 test days | 6.8 s | 4.2 s |
+| max / mean abs deviation from exact | 1.1e-06 / 7.0e-08 | 1.12 / 0.096 (6.5 % of mean abs phi) |
+| same most important feature as exact | 100 % of days | 93.6 % of days |
 
-Waterfall days: FILL IN (detected heat day, false alarm). Temperature group mean |sum phi|: FILL IN.
+KernelSHAP convergence (mean abs deviation): 16 coalitions 0.134, 32: 0.040, 64: 0.021, 126: 7e-08.
 
-**Observations:** FILL IN
+Waterfall days: detected heat day München 2025-06-29 (logit 3.29, p 0.96); most confident false alarm
+Frankfurt 2025-07-02 (38.4 °C, logit 5.79; next day only 27.5 °C). Temperature group mean |sum phi| 6.19
+vs. strongest single feature (Max.-Temp.) 2.41.
+
+**Observations:** KernelSHAP is exact here because its default sample budget (2062) exceeds the 128 possible
+coalitions; the approximation error only appears with fewer coalitions. DeepSHAP keeps efficiency but distributes
+the contributions differently (DeepLIFT rescale rule); its largest deviations occur where ReLU neurons switch.
+On this small model KernelSHAP is only about 1.6x slower than DeepSHAP, not "slow". The false alarm is a
+sudden cool-down that today's features cannot show (no wind, pressure or front information).

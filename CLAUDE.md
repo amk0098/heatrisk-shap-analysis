@@ -30,7 +30,8 @@ reuse the source repo's loader/split logic, keep the model small.
 - SHAP is not causal inference. Don't claim results until code has run and outputs are checked. Keep the experiment log.
 
 ## Status
-Starter project. No MLP or SHAP results yet.
+Data audit, data module, MLP (Run 1) and Shapley analysis on the logit (exact, KernelSHAP, DeepSHAP; Runs 2-3)
+done, see `docs/experiment_log.md`. Open: embeddings (waiting for supervisor), runtime analysis, background sensitivity.
 
 ## Session log
 | Date | What was done | Next step |
@@ -38,3 +39,4 @@ Starter project. No MLP or SHAP results yet.
 | 03.11.2026 | Added CLAUDE.md, .gitignore, data/README.md, pinned requirements.txt, source version (heatrisk-deutschland 9974c0e), MIT LICENSE | Read-only audit of the source repo |
 | 05.11.2026 | Chosen as dataset/MLP for the seminar; seminar requirements, risks and repo role recorded in CLAUDE.md, README, config (pytorch, logit + embedding, DeepSHAP + KernelSHAP) | Clarify "embeddings" with supervisor; audit source loader |
 | 11.11.2026 | Read-only audit of source repo done (`docs/data_audit.md`): loader/target/lags/split correct, no leakage, no date gaps; positive rate 3.15 % (test 3.7 %); TXK_rolling_3 is a 3-day mean; München from 1992. Config hidden layers set to [16, 8] to match slides | Step 2: pin torch, check shap explainers |
+| 11.11.2026 | Steps 2-6: torch pinned + environment check; `src/data.py` + dataset analysis + tests; MLP 7-16-8-1 trained (test F1 0.516, PR-AUC 0.431); exact Shapley (own code, 128 coalitions); KernelSHAP (exact here) and DeepSHAP (max dev 1.12) compared; figures for slides 6, 21-23, 36 | Step 7 embeddings (after supervisor answer) or Step 8 runtime |
