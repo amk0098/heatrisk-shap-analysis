@@ -131,3 +131,29 @@ every additional feature and overtakes KernelSHAP between 12 and 14 features; Ke
 because its default budget (2M + 2048 coalitions) then no longer covers all coalitions (it becomes an approximation).
 DeepSHAP is practically independent of M. The simple claim "KernelSHAP slow, DeepSHAP fast" does not hold for this
 small model; what matters is the number of features.
+
+## Run 5 — background sensitivity (Step 9)
+
+- **Date:** 12.11.2026
+- **Code revision:** `3050975`
+- **Command:** `python scripts/background_sensitivity.py`
+- **Method:** exact Shapley values (own code) for all 3650 test days with three backgrounds from the training period:
+  100 random days (whole year, as in Runs 2-3), 100 random June-August days, and the training mean as a single
+  reference. Sampling noise: 10 random 100-day backgrounds (seeds 0-9).
+
+| Background | base value | Max.-Temp. | Dampfdruck | Mittel-Temp. | 3-Tage-Mittel | rel. Feuchte | Vortags-Max. | Min.-Temp. |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| whole year (100) | −13.25 | 2.41 | 2.10 | 1.96 | 1.72 | 1.48 | 0.43 | 0.26 |
+| summer only (100) | −1.23 | 3.32 | 2.42 | 2.44 | 1.74 | 1.36 | 0.48 | 0.36 |
+| training mean (1) | −8.82 | 2.57 | 2.09 | 1.93 | 1.45 | 1.45 | 0.62 | 0.33 |
+
+(mean |phi| over the test days, logit units)
+
+Same day, two backgrounds — München 2025-06-29, logit 3.29: whole year base −13.25, Max.-Temp. +5.90,
+Mittel-Temp. +4.14, Dampfdruck +3.32; summer only base −1.23, Max.-Temp. +2.47, Mittel-Temp. +1.33, Dampfdruck +0.67.
+Sampling noise of a random 100-day background: std of phi ≈ 11.5 % of the mean |phi|.
+
+**Observations:** The background defines the question a Shapley value answers ("compared to which days?"). For the
+same day and the same logit, the contributions with a summer background are less than half as large as with a
+whole-year background. The global ranking stays similar (Max.-Temp. first, Min.-Temp. and Vortags-Max. last).
+Every reported explanation must therefore name its background.
