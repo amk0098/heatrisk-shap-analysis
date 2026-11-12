@@ -1,4 +1,4 @@
-"""Step 3: dataset analysis for slide 6 (Datensatzanalyse).
+"""Step 3: dataset analysis.
 
 Run from the repository root:
     python scripts/analyze_dataset.py
@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # write files, no window
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -61,7 +61,7 @@ def summarise_splits(train, validation, test) -> pd.DataFrame:
 
 def plot_heat_days_per_month(df: pd.DataFrame, path: Path) -> pd.Series:
     """Share of days in each month that are followed by a heat day, in percent."""
-    # The target belongs to the NEXT day, so group by the month of that day.
+    # month of the predicted day
     target_month = (df["MESS_DATUM"] + pd.Timedelta(days=1)).dt.month
     rate = df.groupby(target_month)[TARGET].mean().reindex(range(1, 13), fill_value=0) * 100
 

@@ -1,10 +1,8 @@
-"""Step 7: Shapley values for the embeddings (8 neurons of the last hidden layer), slide 24.
+"""Step 7: Shapley values for the embeddings (8 neurons of the last hidden layer).
 
 Two views, both with the same 100 background training days as Steps 5-6:
     (a) features -> embedding:  the 7 input features are the players, each of the 8 neurons is explained
-                                ("What has each neuron learned to react to?")
     (b) embedding -> logit:     the 8 neuron values are the players, the logit is explained
-                                ("Which neurons drive the decision?")
 Each view: exact values (own code) + KernelSHAP + DeepSHAP, compared with each other.
 
 Run from the repository root (after scripts/exact_shapley.py):
@@ -15,7 +13,7 @@ Writes:
     outputs/shap/embedding_logit.npz         (b) phi: days x 8 neurons
     outputs/shap/embedding_neurons.csv       one row per neuron: weight, activity, importance, top feature
     outputs/shap/embedding_comparison.csv    deviation of KernelSHAP / DeepSHAP from exact, both views
-    outputs/figures/embeddings.png           slide 24: heatmap (a) + bars (b)
+    outputs/figures/embeddings.png           heatmap (a) + bars (b)
 """
 
 import logging
@@ -113,7 +111,7 @@ def main() -> None:
     print(comparison.to_string(index=False, float_format=lambda v: f"{v:.2e}"))
 
     # =========================================================================
-    # one row per neuron: what does it do?
+    # summary per neuron
     # =========================================================================
     labels = [FEATURE_LABELS_DE[c] for c in FEATURE_COLUMNS]
     importance_a = np.abs(phi_a).mean(axis=0)                           # (7, 8)
@@ -133,7 +131,7 @@ def main() -> None:
     print(neurons.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
 
     # =========================================================================
-    # figure for slide 24: (a) heatmap, (b) bars, neurons in the same order
+    # figure: (a) heatmap, (b) bars, neurons in the same order
     # =========================================================================
     order = np.argsort(neurons.mean_abs_phi_logit.to_numpy())[::-1]     # most important neuron first
     neuron_names = [f"N{j}" for j in order]

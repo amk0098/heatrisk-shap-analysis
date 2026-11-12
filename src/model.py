@@ -1,6 +1,6 @@
 """The MLP for next-day heat-day prediction and its input preprocessing.
 
-Architecture (slide 8):  7 inputs -> 16 (ReLU) -> 8 (ReLU) = embedding -> 1 = logit
+Architecture:  7 inputs -> 16 (ReLU) -> 8 (ReLU) = embedding -> 1 = logit
 Parameters: 7*16+16 + 16*8+8 + 8*1+1 = 128 + 136 + 9 = 273
 """
 
@@ -18,11 +18,9 @@ import torch.nn as nn
 
 @dataclass
 class Preprocessor:
-    """Learns mean and standard deviation on the TRAINING data only.
+    """Mean imputation and standardisation with statistics of the training data.
 
-    transform():  x_scaled = (x - mean) / std,  missing values -> mean (i.e. 0 after scaling)
-    Standardising puts all 7 features on the same scale (°C, hPa and % are very
-    different), which makes training with gradient descent much easier.
+    transform():  x_scaled = (x - mean) / std,  missing values -> mean (0 after scaling)
     """
     columns: list
     mean: np.ndarray = None
@@ -40,7 +38,7 @@ class Preprocessor:
         return ((values - self.mean) / self.std).astype(np.float32)
 
     def inverse_transform(self, scaled: np.ndarray) -> np.ndarray:
-        """Back to °C / hPa / %, e.g. to label plots with real values."""
+        """Back to °C / hPa / %."""
         return scaled * self.std + self.mean
 
     def to_dict(self) -> dict:
@@ -58,18 +56,18 @@ class Preprocessor:
 class HeatMLP(nn.Module):
     def __init__(self, n_features: int = 7, hidden: tuple = (16, 8)):
         super().__init__()
-        # body = the two hidden layers; its output is the 8-dimensional EMBEDDING
+        # body: hidden layers, output = embedding
         self.body = nn.Sequential(
             nn.Linear(n_features, hidden[0]),  # h1 = ReLU(W1 x + b1)
             nn.ReLU(),
             nn.Linear(hidden[0], hidden[1]),   # h2 = ReLU(W2 h1 + b2)
             nn.ReLU(),
         )
-        # head = last layer; its output is the LOGIT z = w3 . h2 + b3
+        # head: last layer, output = logit
         self.head = nn.Linear(hidden[1], 1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Logit, shape (n, 1). No sigmoid here: SHAP explains the logit."""
+        """Logit, shape (n, 1)."""
         return self.head(self.body(x))
 
     def embed(self, x: torch.Tensor) -> torch.Tensor:
@@ -87,7 +85,7 @@ def count_parameters(model: nn.Module) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Saving and loading everything needed to reuse the trained model
+# Checkpoint
 # ---------------------------------------------------------------------------
 
 def save_checkpoint(path, model: HeatMLP, preprocessor: Preprocessor, threshold: float, info: dict) -> None:

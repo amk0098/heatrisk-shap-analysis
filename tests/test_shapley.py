@@ -1,4 +1,4 @@
-"""The exact Shapley code must reproduce the slide example and satisfy the four axioms (slide 14).
+"""Exact Shapley values: worked example, the four Shapley axioms, linear closed form.
 
 Run from the repository root:  python -m pytest tests/test_shapley.py -v
 """
@@ -15,8 +15,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.shapley import coalition_masks, exact_shapley, shapley_weight  # noqa: E402
 
 
-def slide_neuron(z):
-    """ReLU(T + 0.1*H - 30), the example from slides 12 and 18."""
+def example_neuron(z):
+    """ReLU(T + 0.1*H - 30), worked example with known values."""
     return np.maximum(0.0, z[:, 0] + 0.1 * z[:, 1] - 30.0)
 
 
@@ -27,28 +27,27 @@ def test_masks_cover_all_coalitions():
     assert not masks[0].any() and masks[-1].all()        # first = empty set, last = all features
 
 
-def test_weight_example_from_slide_13():
+def test_weight_of_empty_coalition():
     assert shapley_weight(0, 7) == pytest.approx(1 / 7)  # 0! 6! / 7!
 
 
 def test_weights_sum_to_one():
-    # For a fixed feature i, the weights over all S without i are a probability distribution.
     M = 7
     masks = coalition_masks(M)
     total = sum(shapley_weight(int(m.sum()), M) for m in masks if not m[0])
     assert total == pytest.approx(1.0)
 
 
-def test_slide_example():
+def test_worked_example():
     today = np.array([[28.0, 60.0]])
     reference = np.array([[25.0, 20.0]])
-    phi, base = exact_shapley(slide_neuron, today, reference)
+    phi, base = exact_shapley(example_neuron, today, reference)
     assert phi[0] == pytest.approx([1.5, 2.5])
     assert base == 0.0
 
 
 def random_model(seed=0, M=5):
-    """A small random ReLU network in numpy, enough to test the axioms."""
+    """Small random ReLU network in numpy."""
     rng = np.random.default_rng(seed)
     W1, b1 = rng.normal(size=(M, 6)), rng.normal(size=6)
     w2 = rng.normal(size=6)

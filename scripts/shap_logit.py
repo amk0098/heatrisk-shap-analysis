@@ -8,12 +8,12 @@ Writes to outputs/shap/:
     comparison_logit.csv                   deviation from exact per method
     kernel_convergence.csv                 KernelSHAP error vs number of coalitions
 and to outputs/figures/:
-    comparison_scatter.png      slide 21: KernelSHAP / DeepSHAP vs exact
-    comparison_bars.png         slide 21 (alternative): mean |phi| per feature and method
-    waterfall_two_days.png      slide 22: a detected heat day and a false alarm
-    beeswarm_test.png           slide 23: all test days
-    group_importance.png        slide 23: temperature features summed
-    kernel_convergence.png      backup slide 36
+    comparison_scatter.png      KernelSHAP / DeepSHAP vs exact
+    comparison_bars.png         mean |phi| per feature and method
+    waterfall_two_days.png      a detected heat day and a false alarm
+    beeswarm_test.png           all test days
+    group_importance.png        temperature features summed
+    kernel_convergence.png      KernelSHAP error vs number of coalitions
 """
 
 import sys
@@ -37,7 +37,7 @@ from src.model import load_checkpoint  # noqa: E402
 from src.plot_style import DARK, GREEN, GREY, TEAL, apply_style  # noqa: E402
 from src.plots import CITY_NAMES_DE, deviation_scatter, waterfall  # noqa: E402
 
-# shap's DeepExplainer uses an old numpy interface internally; the warning is harmless.
+# DeprecationWarnings from shap internals
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="shap")
 
 SHAP_DIR = REPO_ROOT / "outputs" / "shap"
@@ -63,13 +63,13 @@ def main() -> None:
         with torch.no_grad():
             return model(torch.from_numpy(z.astype(np.float32))).numpy().astype(np.float64).ravel()
 
-    # ---- KernelSHAP: model-agnostic, samples coalitions + weighted regression ---
+    # ---- KernelSHAP -----------------------------------------------------------------
     kernel = shap.KernelExplainer(predict_logit, background)
     start = time.perf_counter()
     phi_kernel = np.asarray(kernel.shap_values(X, silent=True))     # default nsamples = 2*7 + 2048
     kernel_seconds = time.perf_counter() - start
 
-    # ---- DeepSHAP: uses the network's layers (DeepLIFT rescale rule) --------------
+    # ---- DeepSHAP -------------------------------------------------------------------
     deep = shap.DeepExplainer(model, torch.from_numpy(background))
     start = time.perf_counter()
     phi_deep = np.asarray(deep.shap_values(torch.from_numpy(X))).reshape(len(X), -1)
@@ -99,14 +99,13 @@ def main() -> None:
     print("Comparison with exact Shapley values (3650 test days, logit units):")
     print(comparison.T.to_string(header=False))
 
-    # ---- KernelSHAP convergence (backup slide 36) -------------------------------------
+    # ---- KernelSHAP convergence ------------------------------------------------------
     rng = np.random.default_rng(SEED)
     subset = np.sort(rng.choice(len(X), size=CONVERGENCE_DAYS, replace=False))
     conv = []
     for n in CONVERGENCE_SAMPLES:
         np.random.seed(SEED)                       # KernelExplainer draws coalitions with numpy's global RNG
-        # l1_reg=False: plain KernelSHAP. Otherwise shap adds a Lasso feature selection
-        # whenever fewer than 20 % of all coalitions are sampled, which is a different method.
+        # l1_reg=False: without it shap adds Lasso feature selection when < 20 % of coalitions are sampled
         phi_n = np.asarray(kernel.shap_values(X[subset], nsamples=n, l1_reg=False, silent=True))
         dev = np.abs(phi_n - phi_exact[subset])
         conv.append({"nsamples": n, "mean_abs_deviation": dev.mean(), "max_abs_deviation": dev.max()})
@@ -117,7 +116,7 @@ def main() -> None:
 
     labels = [FEATURE_LABELS_DE[c] for c in FEATURE_COLUMNS]
 
-    # ---- figure: scatter vs exact (slide 21) ---------------------------------------------
+    # ---- figure: scatter vs exact ---------------------------------------------------------
     fig, axes = plt.subplots(1, 2, figsize=(11, 5.2))
     deviation_scatter(axes[0], phi_exact, phi_kernel, "KernelSHAP", GREEN)
     deviation_scatter(axes[1], phi_exact, phi_deep, "DeepSHAP", TEAL)
@@ -125,7 +124,7 @@ def main() -> None:
     fig.savefig(FIGURE_DIR / "comparison_scatter.png")
     plt.close(fig)
 
-    # ---- figure: mean |phi| per feature and method (slide 21, alternative) ----------------
+    # ---- figure: mean |phi| per feature and method -----------------------------------------
     order = np.argsort(np.abs(phi_exact).mean(0))[::-1]
     fig, ax = plt.subplots(figsize=(9, 4.8))
     width = 0.27
@@ -138,7 +137,7 @@ def main() -> None:
     fig.savefig(FIGURE_DIR / "comparison_bars.png")
     plt.close(fig)
 
-    # ---- figure: two waterfalls (slide 22) -------------------------------------------------
+    # ---- figure: two waterfalls --------------------------------------------------------------
     logit_threshold = np.log(threshold / (1 - threshold))      # probability 0.9 -> logit 2.20
     predicted = logits >= logit_threshold
     y = exact["y"].astype(bool)
@@ -160,7 +159,7 @@ def main() -> None:
               f"heat day next = {bool(y[day])}")
         print("   " + ", ".join(f"{FEATURE_LABELS_DE[c]} {v:+.2f}" for c, v in zip(FEATURE_COLUMNS, phi_exact[day])))
 
-    # ---- figure: beeswarm of all test days (slide 23) ------------------------------------------
+    # ---- figure: beeswarm of all test days -----------------------------------------------------
     explanation = shap.Explanation(values=phi_exact, base_values=np.full(len(X), base_value),
                                    data=exact["X_raw"], feature_names=labels)
     plt.figure()
@@ -172,7 +171,7 @@ def main() -> None:
     plt.savefig(FIGURE_DIR / "beeswarm_test.png")
     plt.close("all")
 
-    # ---- figure: temperature features as one group (slide 23) ----------------------------------
+    # ---- figure: temperature features as one group ---------------------------------------------
     temp_idx = [FEATURE_COLUMNS.index(c) for c in TEMPERATURE]
     other = [i for i in range(7) if i not in temp_idx]
     strongest = temp_idx[int(np.abs(phi_exact[:, temp_idx]).mean(0).argmax())]
@@ -193,7 +192,7 @@ def main() -> None:
     plt.close(fig)
     print(f"\nTemperature group: mean |sum phi| {group_values[0]:.2f}  vs. strongest single feature {single_max:.2f}")
 
-    # ---- figure: convergence (backup slide 36) ------------------------------------------------
+    # ---- figure: convergence -------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
     ax.plot(conv["nsamples"], conv["mean_abs_deviation"], marker="o", color=GREEN, label="mittlere Abw.")
     ax.plot(conv["nsamples"], conv["max_abs_deviation"], marker="o", color=DARK, label="max. Abw.")

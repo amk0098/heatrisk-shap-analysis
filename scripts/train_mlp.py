@@ -53,7 +53,7 @@ FIGURE_DIR = OUTPUT_DIR / "figures"
 
 
 def set_seed(seed: int) -> None:
-    """Same seed -> same initial weights and same batch order -> same result."""
+    """Seed numpy and torch."""
     np.random.seed(seed)
     torch.manual_seed(seed)
 
@@ -73,8 +73,8 @@ def metrics(y_true, probabilities, threshold) -> dict:
 
 
 def evaluate_loss(model, loss_fn, X, y) -> float:
-    model.eval()                      # evaluation mode (no training behaviour)
-    with torch.no_grad():             # no gradients needed -> faster, less memory
+    model.eval()
+    with torch.no_grad():
         return loss_fn(model(X), y).item()
 
 
@@ -88,7 +88,7 @@ def main() -> None:
     df = build_dataset()
     train, validation, test = chronological_split(df)
 
-    preprocessor = Preprocessor(FEATURE_COLUMNS).fit(train)   # fitted on TRAIN only
+    preprocessor = Preprocessor(FEATURE_COLUMNS).fit(train)
     X_train = torch.from_numpy(preprocessor.transform(train))
     X_val = torch.from_numpy(preprocessor.transform(validation))
     X_test = torch.from_numpy(preprocessor.transform(test))
@@ -100,19 +100,18 @@ def main() -> None:
     model = HeatMLP(n_features=len(FEATURE_COLUMNS), hidden=HIDDEN)
     print(f"Model: {model}\nParameters: {count_parameters(model)}")
 
-    # Heat days are rare (3 %). pos_weight makes a missed heat day count as much
-    # as ~32 normal days in the loss, so the model cannot just say "never".
+    # class weight for the rare positive class: n_neg / n_pos
     n_pos = y_train.sum().item()
     n_neg = len(y_train) - n_pos
     pos_weight = torch.tensor([n_neg / n_pos])
-    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)    # sigmoid + log-loss in one, numerically stable
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(f"pos_weight = {pos_weight.item():.1f}")
 
     loader = DataLoader(
         TensorDataset(X_train, y_train),
         batch_size=BATCH_SIZE,
-        shuffle=True,                                         # new order every epoch
+        shuffle=True,
         generator=torch.Generator().manual_seed(SEED),
     )
 
@@ -125,11 +124,11 @@ def main() -> None:
         model.train()
         running = 0.0
         for X_batch, y_batch in loader:
-            optimizer.zero_grad()                 # 1. forget gradients of the last batch
-            logits = model(X_batch)               # 2. forward pass
-            loss = loss_fn(logits, y_batch)       # 3. how wrong are we?
-            loss.backward()                       # 4. backpropagation: d loss / d weights
-            optimizer.step()                      # 5. move weights a small step downhill
+            optimizer.zero_grad()
+            logits = model(X_batch)
+            loss = loss_fn(logits, y_batch)
+            loss.backward()
+            optimizer.step()
             running += loss.item() * len(X_batch)
 
         train_loss = running / len(X_train)
@@ -147,10 +146,10 @@ def main() -> None:
             break
 
     train_seconds = time.perf_counter() - start
-    model.load_state_dict(best_state)          # go back to the best epoch
+    model.load_state_dict(best_state)
     model.eval()
 
-    # ---- 4. threshold on VALIDATION, then test once ----------------------------
+    # ---- 4. threshold on validation, then test ---------------------------------
     val_proba = model.predict_proba(X_val).numpy()
     val_results = [metrics(y_val.squeeze(1).numpy(), val_proba, t) for t in THRESHOLDS]
     best_val = max(val_results, key=lambda r: r["f1"])
@@ -191,7 +190,7 @@ def main() -> None:
     ax.set_xlabel("Epoche")
     ax.set_ylabel("gewichteter Verlust")
     legend = ax.legend(frameon=True, framealpha=1, edgecolor="none")
-    legend.set_zorder(5)  # draw the legend on top of the dotted line
+    legend.set_zorder(5)
     ax.set_title("Trainingsverlauf")
     fig.savefig(FIGURE_DIR / "training_curve.png")
     plt.close(fig)

@@ -1,3 +1,12 @@
+"""Check that torch and shap work together.
+
+Run from the repository root:
+    python scripts/check_environment.py
+
+Test 1: single neuron ReLU(T + 0.1*H - 30) with known exact and DeepSHAP values.
+Test 2: untrained 7-16-8-1 network: parameter count, efficiency of both explainers, embedding output.
+"""
+
 import numpy as np
 import shap
 import torch
@@ -12,10 +21,10 @@ def print_versions():
 
 
 # ---------------------------------------------------------------------------
-# Test 1: the slide neuron, answers known by hand
+# Test 1: single neuron with known values
 # ---------------------------------------------------------------------------
 
-class SlideNeuron(nn.Module):
+class ExampleNeuron(nn.Module):
     """One neuron: ReLU(1.0 * T + 0.1 * H - 30)."""
 
     def __init__(self):
@@ -30,19 +39,19 @@ class SlideNeuron(nn.Module):
         return self.relu(self.linear(x))
 
 
-def test_slide_neuron():
-    print("Test 1: slide neuron ReLU(T + 0.1*H - 30)")
-    model = SlideNeuron().eval()
+def test_example_neuron():
+    print("Test 1: example neuron ReLU(T + 0.1*H - 30)")
+    model = ExampleNeuron().eval()
 
     today = np.array([[28.0, 60.0]], dtype=np.float32)      # T = 28, H = 60
     reference = np.array([[25.0, 20.0]], dtype=np.float32)  # T = 25, H = 20
 
-    # DeepSHAP: works directly on the PyTorch model.
+    # DeepSHAP
     deep = shap.DeepExplainer(model, torch.from_numpy(reference))
     deep_values = deep.shap_values(torch.from_numpy(today))
     deep_values = np.asarray(deep_values).reshape(-1)
 
-    # KernelSHAP: only needs a function numpy -> numpy, it never looks inside.
+    # KernelSHAP
     def predict(x):
         with torch.no_grad():
             return model(torch.from_numpy(x.astype(np.float32))).numpy().reshape(-1)
@@ -63,7 +72,7 @@ def test_slide_neuron():
 # ---------------------------------------------------------------------------
 
 class HeatMLP(nn.Module):
-    """Same shape as the seminar model. Untrained here, only for the check."""
+    """Same shape as the trained model (untrained here)."""
 
     def __init__(self, n_features=7, hidden=(16, 8)):
         super().__init__()
@@ -76,7 +85,7 @@ class HeatMLP(nn.Module):
         self.head = nn.Linear(hidden[1], 1)
 
     def forward(self, x):
-        # Returns the logit (no sigmoid), as in the talk.
+        # logit
         return self.head(self.body(x))
 
 
@@ -109,7 +118,7 @@ def test_real_shape():
     kernel = shap.KernelExplainer(predict, background)
     kernel_values = np.asarray(kernel.shap_values(days, silent=True)).reshape(5, 7)
 
-    # Efficiency: base value + sum of Shapley values = logit
+    # efficiency: base value + sum of Shapley values = logit
     deep_gap = np.abs(base_value + deep_values.sum(axis=1) - logits).max()
     kernel_gap = np.abs(base_value + kernel_values.sum(axis=1) - logits).max()
     print(f"  efficiency gap DeepSHAP:   {deep_gap:.2e}")
@@ -125,6 +134,6 @@ def test_real_shape():
 
 if __name__ == "__main__":
     print_versions()
-    test_slide_neuron()
+    test_example_neuron()
     test_real_shape()
     print("Environment works: torch and shap are compatible.")

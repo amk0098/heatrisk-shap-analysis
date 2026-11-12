@@ -63,8 +63,8 @@ unrealistic combinations.
 
 ## Consequences for this project
 
-1. **Reuse** the source loader, target, lag features and split unchanged, so the MLP is comparable with the baselines above.
-2. **Impute** missing values with training means (as the source pipeline does) and standardise with training statistics.
-3. **Name the rolling feature correctly**: `TXK_rolling_3` is the mean of the maximum temperatures of the three previous days, not a 3-day maximum.
-4. **Report the positive rate as ≈ 3 %** (3.15 % overall, 3.7 % in the test period), not 4 %.
-5. Mention in the talk that München starts in 1992.
+1. The source loader, target, lag features and split are reused unchanged, so the MLP is comparable with the baselines above.
+2. Missing values are imputed with training means (as in the source pipeline); standardisation uses training statistics.
+3. `TXK_rolling_3` is the mean of the maximum temperatures of the three previous days, not a 3-day maximum.
+4. The positive rate is ≈ 3 % (3.15 % overall, 3.7 % in the test period).
+5. The München series starts in 1992.

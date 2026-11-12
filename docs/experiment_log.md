@@ -30,7 +30,7 @@ heat days with 124 false alarms. Identical results on two machines (seed 42).
 
 Threshold 0.3, precision 0.457, recall 0.556 (75 of 135), F1 0.502, PR-AUC 0.448.
 Without weighting the model finds 15 fewer heat days; the ranking quality (PR-AUC) is similar.
-The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher recall, as on the slides).
+The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher recall).
 
 ## Run 2 — exact Shapley values on the logit (Step 5)
 
@@ -41,7 +41,7 @@ The weighting mainly moves the decision threshold. Kept pos_weight = 32 (higher 
 - **Background:** 100 random training days (seed 42), saved in `outputs/shap/background.npz`
 - **Method:** own implementation (`src/shapley.py`), all 2^7 = 128 coalitions, interventional value function
   (unknown features replaced by each background day, outputs averaged). Tested in `tests/test_shapley.py`
-  (slide example, four axioms, linear closed form).
+  (worked example, four axioms, linear closed form).
 
 | Result | Value |
 |---|---|

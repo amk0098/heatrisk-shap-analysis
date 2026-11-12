@@ -1,4 +1,4 @@
-"""Checks of the model code. Run from the repository root:  python -m pytest"""
+"""Checks of the model code."""
 
 import sys
 from pathlib import Path
@@ -13,7 +13,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.model import HeatMLP, Preprocessor, count_parameters  # noqa: E402
 
 
-def test_parameter_count_matches_slide():
+def test_parameter_count():
     assert count_parameters(HeatMLP(7, (16, 8))) == 273
 
 
@@ -26,7 +26,6 @@ def test_output_shapes():
 
 
 def test_logit_is_head_of_embedding():
-    # logit = last layer applied to the embedding; this is what the embedding analysis relies on
     torch.manual_seed(0)
     model = HeatMLP()
     x = torch.randn(10, 7)
@@ -39,7 +38,5 @@ def test_preprocessor_uses_only_fit_data():
     pre = Preprocessor(["a", "b"]).fit(train)
     scaled_train = pre.transform(train)
     assert np.allclose(scaled_train.mean(axis=0), 0, atol=1e-6)  # centred on train
-    # missing value in new data -> training mean -> 0 after scaling
     assert pre.transform(other)[0, 1] == 0
-    # new data does not change the fitted statistics
     assert np.allclose(pre.mean, [2.0, 20.0])

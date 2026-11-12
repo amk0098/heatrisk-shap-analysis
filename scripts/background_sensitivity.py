@@ -1,17 +1,17 @@
-"""Step 9: how much do the Shapley values depend on the background data? (backup slide 38)
+"""Step 9: sensitivity of the Shapley values to the background data.
 
 All backgrounds come from the TRAINING period; values are exact (own code, 128 coalitions).
     Ganzes Jahr   100 random training days (the default, same as Steps 5-6)
     Nur Sommer    100 random training days from June-August
     Mittelwert    one single reference day = training mean of every feature
-plus: 10 different random draws of "Ganzes Jahr" (seeds 0-9) to see the sampling noise.
+plus 10 random draws of "Ganzes Jahr" (seeds 0-9) for the sampling noise.
 
 Run from the repository root:
     python scripts/background_sensitivity.py
 
 Writes:
     outputs/shap/background_sensitivity.csv      base value and mean |phi| per feature and background
-    outputs/figures/background_waterfalls.png    slide 38: the same day with two backgrounds
+    outputs/figures/background_waterfalls.png    one day with two backgrounds
     outputs/figures/background_ranking.png       mean |phi| per feature for the three backgrounds
 """
 
@@ -81,20 +81,19 @@ def main() -> None:
     print(f"\nSampling noise of a random 100-day background (10 draws): "
           f"std of phi = {100 * noise:.1f} % of the mean |phi|")
 
-    # ---- the day for slide 38: the detected heat day from slide 22 --------------------
-    # same rule as in scripts/shap_logit.py: true positive with the median logit
+    # ---- example day: true positive with the median logit (as in scripts/shap_logit.py) ----
     logits = exact["logit"]
     predicted = logits >= np.log(threshold / (1 - threshold))
     tp = np.flatnonzero(predicted & exact["y"].astype(bool))
     day = tp[np.argsort(logits[tp])[len(tp) // 2]]
     city = CITY_NAMES_DE[str(exact["cities"][day])]
-    print(f"\nDay for slide 38: {city}, {exact['dates'][day]} (logit {logits[day]:.2f})")
+    print(f"\nExample day: {city}, {exact['dates'][day]} (logit {logits[day]:.2f})")
     for name in ["Ganzes Jahr", "Nur Sommer"]:
         phi, base = results[name]
         print(f"  {name:12s} base {base:7.2f}  " +
               ", ".join(f"{FEATURE_LABELS_DE[c]} {v:+.2f}" for c, v in zip(FEATURE_COLUMNS, phi[day])))
 
-    # ---- figure: two waterfalls of the same day (slide 38) ------------------------------
+    # ---- figure: two waterfalls of the same day -------------------------------------------
     fig, axes = plt.subplots(1, 2, figsize=(15, 5.8))
     for ax, name in zip(axes, ["Ganzes Jahr", "Nur Sommer"]):
         phi, base = results[name]

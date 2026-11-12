@@ -1,6 +1,6 @@
 # References
 
-Same list as in the seminar talk; bibliographic details checked against the publishers' records (12.11.2026).
+Literature used in the seminar talk.
 
 - **[AJL21]** Aas, K.; Jullum, M.; Løland, A.: Explaining individual predictions when features are dependent: More
   accurate approximations to Shapley values. *Artificial Intelligence* 298 (2021), 103502.

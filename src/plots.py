@@ -1,4 +1,4 @@
-"""Plots for the Shapley results, in the style of the slides."""
+"""Plots for the Shapley results."""
 
 import matplotlib.pyplot as plt
 import numpy as np

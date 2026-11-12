@@ -1,4 +1,4 @@
-"""Step 8: runtime of exact Shapley, KernelSHAP and DeepSHAP (slide 25).
+"""Step 8: runtime of exact Shapley, KernelSHAP and DeepSHAP.
 
 Two experiments on the trained MLP (logit output):
     A) number of explained days     1, 10, 100, 1000   (background fixed at 100 days)
@@ -13,7 +13,7 @@ Run from the repository root:
 Writes:
     outputs/runtime/runtime.csv        one row per method x setting (median of repeats)
     outputs/runtime/hardware.txt       machine the numbers were measured on
-    outputs/figures/runtime.png        slide 25
+    outputs/figures/runtime.png        runtime plots
 """
 
 import logging
@@ -42,7 +42,7 @@ from src.plot_style import DARK, GREEN, TEAL, apply_style  # noqa: E402
 from src.shapley import exact_shapley, sample_background  # noqa: E402
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="shap")
-# shap logs a hint for backgrounds > 100 rows; large backgrounds are exactly what experiment B tests.
+# silence shap's hint for backgrounds > 100 rows (tested on purpose in experiment B)
 logging.getLogger("shap").setLevel(logging.ERROR)
 
 DAYS_GRID = [1, 10, 100, 1000]
@@ -60,7 +60,7 @@ COLORS = {"exakt": DARK, "KernelSHAP": GREEN, "DeepSHAP": TEAL}
 
 
 def repeats_for(n_days: int) -> int:
-    """Short runs are noisy, so repeat them more often and take the median."""
+    """Number of repeats; the median is reported."""
     return 5 if n_days <= 10 else 3 if n_days <= 100 else 1
 
 
@@ -185,7 +185,7 @@ def main() -> None:
     (OUTPUT_DIR / "hardware.txt").write_text(hardware + "\n")
     print("\n" + hardware)
 
-    # ---- figure (slide 25) -----------------------------------------------------
+    # ---- figure ----------------------------------------------------------------
     fig, axes = plt.subplots(1, 3, figsize=(17, 4.8))
     for ax, experiment, x_column, x_label, title, log_x in [
         (axes[0], "A_days", "days", "Anzahl erklärter Tage", f"Hintergrund: {FIXED_BACKGROUND} Tage", True),

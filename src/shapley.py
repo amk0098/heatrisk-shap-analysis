@@ -1,4 +1,4 @@
-"""Exact Shapley values by trying every coalition (slides 11-13).
+"""Exact Shapley values over all coalitions.
 
 Setup ("interventional" Shapley values, the same game KernelSHAP and DeepSHAP approximate):
     - players  = the M input features
@@ -40,8 +40,7 @@ def coalition_values(predict, X: np.ndarray, background: np.ndarray) -> np.ndarr
     """
     n_days, M = X.shape
     masks = coalition_masks(M)                       # (C, M) with C = 2^M
-    # Build every combination: day x coalition x background row.
-    # Known features come from the day, unknown ones from the background row.
+    # day x coalition x background row: features in S from the day, the others from the background row
     z = np.where(
         masks[None, :, None, :],                      # (1, C, 1, M)
         X[:, None, None, :],                          # (n, 1, 1, M)
@@ -115,7 +114,7 @@ def exact_shapley_multi(predict, X: np.ndarray, background: np.ndarray, batch_si
 
 
 def sample_background(X_train: np.ndarray, n: int = 100, seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
-    """Random sample of TRAINING days used as the reference ("unknown" values).
+    """Random sample of training days used as background.
 
     Returns the sampled rows and their row indices (to save and reuse the same background
     for exact Shapley, KernelSHAP and DeepSHAP, so the three are comparable).

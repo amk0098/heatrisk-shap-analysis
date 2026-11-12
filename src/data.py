@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pandas as pd
 
-# Repository root = two levels above this file (src/data.py -> repo/)
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / "data" / "raw"
 
@@ -32,10 +31,10 @@ FEATURE_COLUMNS = [
     "VPM",            # mean vapour pressure of day t
     "UPM",            # mean relative humidity of day t
     "TXK_lag_1",      # maximum temperature of day t-1
-    "TXK_rolling_3",  # MEAN of the maximum temperatures of days t-1, t-2, t-3
+    "TXK_rolling_3",  # mean of the maximum temperatures of days t-1, t-2, t-3
 ]
 
-# Short German labels for the slides, in the same order as FEATURE_COLUMNS
+# Short German labels for plots
 FEATURE_LABELS_DE = {
     "TMK": "Mittel-Temp.",
     "TXK": "Max.-Temp.",
@@ -60,7 +59,6 @@ def load_station_data(file_path: Path) -> pd.DataFrame:
     """Read one DWD station file. Missing values are marked -999 in the file."""
     df = pd.read_csv(file_path, sep=";", na_values=["-999", "-999.0"])
     df.columns = df.columns.str.strip()
-    # Dates are written as numbers like 19900101; read them as text "YYYYMMDD".
     df["MESS_DATUM"] = pd.to_datetime(df["MESS_DATUM"].astype(str), format="%Y%m%d")
     df = df[df["MESS_DATUM"] >= START_DATE].copy()
     df["city"] = CITY_MAP[file_path.name]
@@ -80,7 +78,7 @@ def load_all_stations(data_dir: Path = DATA_DIR) -> pd.DataFrame:
 
 
 def add_target(df: pd.DataFrame) -> pd.DataFrame:
-    """heat_day_next = 1 if TOMORROW's maximum temperature in the same city is >= 30 °C."""
+    """heat_day_next = 1 if the next day's maximum temperature in the same city is >= 30 °C."""
     df = df.copy()
     next_txk = df.groupby("city")["TXK"].shift(-1)
     df[TARGET] = (next_txk >= HEAT_THRESHOLD).astype("Int64")
@@ -109,7 +107,7 @@ def build_dataset(data_dir: Path = DATA_DIR) -> pd.DataFrame:
 
 
 def chronological_split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Train 1990-2020, validation 2021-2023, test 2024-2025. Never shuffled."""
+    """Train 1990-2020, validation 2021-2023, test 2024-2025."""
     train = df[df["MESS_DATUM"] <= TRAIN_END].copy()
     validation = df[
         (df["MESS_DATUM"] >= VALIDATION_START) & (df["MESS_DATUM"] <= VALIDATION_END)

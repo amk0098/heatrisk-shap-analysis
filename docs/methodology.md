@@ -56,7 +56,7 @@ values are computed on the standardised inputs; plots are labelled with the raw 
   methods. Base value = mean logit over these days = −13.25 (most background days are cold; the mean of logits is
   not the logit of the mean probability, so it is not converted to a percentage).
 - **Exact computation** (`src/shapley.py`): all 2^M coalitions as bit masks, Shapley weights
-  |S|!(M−|S|−1)!/M!. Tested against the slide example (φT = 1.5, φH = 2.5), the four axioms (efficiency,
+  |S|!(M−|S|−1)!/M!. Tested against a worked example (φT = 1.5, φH = 2.5), the four axioms (efficiency,
   symmetry, dummy, additivity) and the closed form for linear models.
 - **KernelSHAP:** `shap.KernelExplainer` on a numpy wrapper of the logit, default `nsamples` (2·M + 2048 ≥ 128,
   i.e. all coalitions). Convergence study with 16/32/64/126 coalitions on 300 test days with `l1_reg=False`

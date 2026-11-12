@@ -74,7 +74,7 @@ mkdir -p data/raw
 cp ../heatrisk-deutschland/data/raw/*.txt data/raw/
 
 python -m pytest                              # 21 tests: data pipeline, model, Shapley axioms
-python scripts/check_environment.py           # torch + shap compatibility, slide example
+python scripts/check_environment.py           # torch + shap compatibility
 python scripts/analyze_dataset.py             # Step 3: dataset analysis
 python scripts/train_mlp.py                   # Step 4: train and evaluate the MLP
 python scripts/exact_shapley.py               # Step 5: exact Shapley values (128 coalitions)
@@ -97,7 +97,7 @@ Runtimes depend on the machine; all other numbers are reproducible (seed 42).
 | `src/shapley.py` | exact Shapley values for one or several outputs, background sampling |
 | `src/plots.py`, `src/plot_style.py` | waterfall and comparison plots in the slide colours |
 | `scripts/` | one script per step (see above) |
-| `tests/` | data pipeline, model shapes/parameter count, Shapley axioms and slide example |
+| `tests/` | data pipeline, model shapes/parameter count, Shapley axioms and worked example |
 | `outputs/models/mlp.pt` | trained model with preprocessing statistics and threshold |
 | `outputs/shap/` | all Shapley values and summaries (`.npz`, `.csv`) |
 | `outputs/figures/` | figures; `outputs/figures/slides/` = figures as used in the talk |

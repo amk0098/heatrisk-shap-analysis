@@ -1,9 +1,6 @@
-"""Step 10: draw every result figure at the exact size it has on the seminar slides.
+"""Step 10: result figures at the size they have on the seminar slides (inches as on the slide, 9-11 pt).
 
-The figures from Steps 3-9 are drawn for reading on screen. On a 10-inch slide they would shrink and
-their text would become unreadable, so this script redraws them at their real slide size
-(width x height in inches as on the slide, fonts 9-11 pt). It only reads saved results; nothing is
-trained or recomputed except one exact explanation for slide 38.
+Reads the saved results of Steps 3-9; only the slide 38 explanation is recomputed.
 
 Run from the repository root (after Steps 3-9):
     python scripts/slide_figures.py
@@ -50,7 +47,7 @@ def slide_style() -> None:
 def save(fig, name: str) -> None:
     fig.savefig(OUT / name, facecolor="white")
     plt.close(fig)
-    # store without transparency channel: some viewers tint RGBA pictures grey
+    # RGB without alpha channel
     Image.open(OUT / name).convert("RGB").save(OUT / name)
     print(f"  {name}")
 

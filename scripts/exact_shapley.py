@@ -43,11 +43,11 @@ def main() -> None:
     X_test = preprocessor.transform(test)
 
     def predict_logit(z: np.ndarray) -> np.ndarray:
-        """numpy (n, 7) -> numpy (n,): the function whose output we explain."""
+        """numpy (n, 7) -> numpy (n,): explained output (logit)."""
         with torch.no_grad():
             return model(torch.from_numpy(z.astype(np.float32))).numpy().astype(np.float64).ravel()
 
-    # ---- background: 100 random TRAINING days -------------------------------
+    # ---- background: 100 random training days -------------------------------
     background, background_idx = sample_background(X_train, n=BACKGROUND_SIZE, seed=SEED)
     np.savez(SHAP_DIR / "background.npz", X=background, train_row=background_idx,
              dates=train["MESS_DATUM"].to_numpy()[background_idx].astype("datetime64[D]").astype(str),
@@ -67,8 +67,7 @@ def main() -> None:
     # ---- checks ------------------------------------------------------------------
     logits = predict_logit(X_test)
     gap = np.abs(base_value + phi.sum(axis=1) - logits).max()
-    print(f"\nBase value (mean logit over background): {base_value:.3f}  "
-          f"= probability {1 / (1 + np.exp(-base_value)):.1%}")
+    print(f"\nBase value (mean logit over background): {base_value:.3f}")
     print(f"Efficiency check, max |base + sum(phi) - logit| over all test days: {gap:.2e}")
 
     # ---- save ---------------------------------------------------------------------

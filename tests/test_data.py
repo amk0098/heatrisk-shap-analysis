@@ -1,8 +1,4 @@
-"""Checks of the data pipeline. Run from the repository root:  pytest
-
-These tests protect the things a supervisor would ask about:
-missing values, leakage, the split and the target definition.
-"""
+"""Checks of the data pipeline: missing values, target, lag features, split."""
 
 import sys
 from pathlib import Path
@@ -33,12 +29,11 @@ def df():
 
 
 def test_missing_marker_removed(raw):
-    # DWD writes -999 for "no measurement"; none may survive loading.
     assert (raw[["TMK", "TXK", "TNK", "VPM", "UPM"]] <= -998).sum().sum() == 0
 
 
 def test_no_date_gaps(raw):
-    # Lags use the previous ROW, so the previous row must be yesterday.
+    # lags use the previous row, so it must be the previous day
     gaps = raw.groupby("city")["MESS_DATUM"].diff().dt.days.dropna()
     assert (gaps == 1).all()
 
@@ -67,7 +62,7 @@ def test_split_is_chronological_and_complete(df):
 
 
 def test_split_sizes_match_audit(df):
-    # Numbers from docs/data_audit.md; if these change, the source data changed.
+    # numbers from docs/data_audit.md
     train, validation, test = chronological_split(df)
     assert (len(train), len(validation), len(test)) == (55543, 5475, 3650)
     assert (train[TARGET].sum(), validation[TARGET].sum(), test[TARGET].sum()) == (1682, 219, 135)
