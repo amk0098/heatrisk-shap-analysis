@@ -1,0 +1,9 @@
+platform: macOS-15.8-arm64-arm-64bit-Mach-O
+machine: arm64
+python: 3.13.3
+torch: 2.15.0
+shap: 0.54.1
+cpu cores: 8
+torch threads: 4
+chip: Apple M1
+memory bytes: 8589934592
