@@ -157,3 +157,41 @@ Sampling noise of a random 100-day background: std of phi ≈ 11.5 % of the mean
 same day and the same logit, the contributions with a summer background are less than half as large as with a
 whole-year background. The global ranking stays similar (Max.-Temp. first, Min.-Temp. and Vortags-Max. last).
 Every reported explanation must therefore name its background.
+
+## Run 6 — Shapley values of the embeddings (Step 7)
+
+- **Date:** 12.11.2026
+- **Code revision:** `3d0c083`
+- **Command:** `python scripts/shap_embeddings.py`
+- **Status of the requirement:** the supervisor has not yet said which embedding analysis he means; both readings
+  were built. Same model and 100-day background as Runs 2-3.
+- **(a) features → embedding:** the 7 features are the players, each of the 8 neurons of the last hidden layer is
+  explained separately (`exact_shapley_multi`, 128 coalitions, all 8 outputs at once).
+- **(b) embedding → logit:** the 8 neuron values are the players for the logit (256 coalitions); background =
+  embeddings of the 100 background days. The last layer is linear, so phi_j = w_j (h_j − mean h_j).
+
+| Check | Value |
+|---|---|
+| (a) efficiency gap | 3.6e-15 |
+| (b) base value | −13.25 (same as for the input features) |
+| (b) exact vs closed form w_j (h_j − mean h_j) | 1.3e-06 |
+| (a) KernelSHAP / DeepSHAP max deviation | 2.8e-05 / 0.41 |
+| (b) KernelSHAP / DeepSHAP max deviation | 3.0e-05 / 2.9e-06 |
+
+| Neuron | weight to logit | active (all test days) | active before heat days | mean abs phi (b) | strongest input |
+|---|---:|---:|---:|---:|---|
+| N7 | −1.07 | 92 % | 25 % | 2.86 | Max.-Temp. |
+| N5 | −0.97 | 91 % | 27 % | 2.69 | Dampfdruck |
+| N2 | −0.56 | 97 % | 60 % | 1.57 | Max.-Temp. |
+| N4 | −0.48 | 96 % | 50 % | 1.43 | Max.-Temp. |
+| N1 | +0.58 | 36 % | 100 % | 0.36 | Max.-Temp. |
+| N3 | +0.27 | 35 % | 100 % | 0.20 | Max.-Temp. |
+| N0 | +0.32 | 31 % | 99 % | 0.16 | Max.-Temp. |
+| N6 | +0.09 | 19 % | 0 % | 0.01 | (practically unused) |
+
+**Observations:** The decision is dominated by four neurons with negative weights that are active on more than 90 %
+of all days ("normal weather") and switch off before most heat days; the network recognises heat mainly by these
+neurons turning off. Three neurons with positive weights are active before almost every heat day but contribute
+little because of their small weights. One neuron (N6) is practically unused. The important neurons react to the
+temperatures, vapour pressure and humidity, hardly to Min.-Temp. and Vortags-Max. DeepSHAP is exact for (b) because
+the last layer is linear, and approximate for (a) because of the ReLU layers.
