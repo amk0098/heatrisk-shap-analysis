@@ -83,6 +83,37 @@ def exact_shapley(predict, X: np.ndarray, background: np.ndarray, batch_size: in
     return np.vstack(phis), base_value
 
 
+def exact_shapley_multi(predict, X: np.ndarray, background: np.ndarray, batch_size: int = 25):
+    """Like exact_shapley, but for a model with K outputs (e.g. the 8 embedding neurons).
+
+    predict:  function, array (n, M) -> array (n, K)
+    returns (phi, base_values):
+        phi          (n_days, M, K)   contribution of feature i to output k
+        base_values  (K,)             mean of each output over the background
+    Every output is its own game; the coalitions are evaluated only once for all K outputs.
+    """
+    X = np.asarray(X, dtype=np.float64)
+    background = np.asarray(background, dtype=np.float64)
+    n_all, M = X.shape
+    masks = coalition_masks(M)
+    sizes = masks.sum(axis=1)
+    phis, base_values = [], None
+    for start in range(0, n_all, batch_size):
+        Xb = X[start:start + batch_size]
+        z = np.where(masks[None, :, None, :], Xb[:, None, None, :], background[None, None, :, :])
+        out = predict(z.reshape(-1, M))                               # (rows, K)
+        v = out.reshape(len(Xb), len(masks), len(background), -1).mean(axis=2)   # (n, C, K)
+        phi = np.zeros((len(Xb), M, v.shape[2]))
+        for i in range(M):
+            without_i = np.flatnonzero(~masks[:, i])
+            with_i = without_i | (1 << i)
+            weights = np.array([shapley_weight(s, M) for s in sizes[without_i]])
+            phi[:, i, :] = np.einsum("ncK,c->nK", v[:, with_i, :] - v[:, without_i, :], weights)
+        phis.append(phi)
+        base_values = v[0, 0, :]
+    return np.concatenate(phis), base_values
+
+
 def sample_background(X_train: np.ndarray, n: int = 100, seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
     """Random sample of TRAINING days used as the reference ("unknown" values).
 

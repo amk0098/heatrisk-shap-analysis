@@ -98,3 +98,18 @@ def test_linear_model_has_closed_form():
     X, background = rng.normal(size=(5, 3)), rng.normal(size=(30, 3))
     phi, _ = exact_shapley(f, X, background)
     assert phi == pytest.approx(w * (X - background.mean(axis=0)))
+
+
+def test_multi_output_equals_one_output_at_a_time():
+    from src.shapley import exact_shapley_multi
+    rng = np.random.default_rng(5)
+    f, g = random_model(6), random_model(7)
+    both = lambda z: np.stack([f(z), g(z)], axis=1)        # model with K = 2 outputs
+    X, background = rng.normal(size=(4, 5)), rng.normal(size=(12, 5))
+    phi, base = exact_shapley_multi(both, X, background)
+    phi_f, base_f = exact_shapley(f, X, background)
+    phi_g, base_g = exact_shapley(g, X, background)
+    assert phi.shape == (4, 5, 2)
+    assert phi[:, :, 0] == pytest.approx(phi_f)
+    assert phi[:, :, 1] == pytest.approx(phi_g)
+    assert base == pytest.approx([base_f, base_g])
