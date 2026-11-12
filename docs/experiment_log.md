@@ -195,3 +195,26 @@ neurons turning off. Three neurons with positive weights are active before almos
 little because of their small weights. One neuron (N6) is practically unused. The important neurons react to the
 temperatures, vapour pressure and humidity, hardly to Min.-Temp. and Vortags-Max. DeepSHAP is exact for (b) because
 the last layer is linear, and approximate for (a) because of the ReLU layers.
+
+## Run 7 — full reproduction from a fresh clone (Step 12)
+
+- **Date:** 12.11.2026
+- **Code revision:** `f5b588a` (fresh `git clone`, raw data copied as in `data/README.md`)
+- **Machine:** Linux x86_64, 2 cores, Python 3.13, same pinned packages (the committed results come from an Apple M1)
+- **Commands:** `python -m pytest`, then every script in `scripts/` in the order of the README; no errors.
+
+| Result | Fresh run vs. committed |
+|---|---|
+| tests | 21 passed |
+| dataset summary | identical |
+| MLP (best epoch, confusion matrix, precision, recall, F1, PR-AUC) | identical |
+| exact Shapley values, all 3650 days × 7 features | max. difference 3.5e-06 |
+| KernelSHAP / DeepSHAP deviations, background sensitivity, embeddings | max. difference < 1e-06 |
+| KernelSHAP convergence, 32 / 64 / 126 coalitions | identical |
+| KernelSHAP convergence, 16 coalitions | mean deviation 0.142 vs. 0.134, max. 7.9 vs. 12.8 |
+
+**Observations:** All results are reproducible across machines up to float32 rounding (≤ 3.5e-06). The only
+exception is KernelSHAP with 16 coalitions: with only 16 samples for 7 unknowns the weighted regression is
+numerically unstable, so rounding differences change the result (three runs: mean deviation 0.134 / 0.142 / 0.149,
+maximum 8–14). This is itself a finding: far too few coalitions make KernelSHAP not only inaccurate but unstable.
+Runtimes differ by machine and are only comparable within one run.

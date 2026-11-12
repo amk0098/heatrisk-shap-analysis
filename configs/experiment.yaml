@@ -1,4 +1,5 @@
-# Starter configuration. Verify all assumptions against the source project.
+# Record of the settings used for the results in docs/experiment_log.md.
+# The scripts define these values as constants (src/data.py, scripts/*.py); keep this file in sync.
 project:
   name: heatrisk-shap-analysis
   source_repository: https://github.com/amk0098/heatrisk-deutschland
@@ -16,8 +17,12 @@ model:
   random_seed: 42
   hidden_layers: [16, 8]  # 7-16-8-1 = 273 parameters, matches the seminar slides
   activation: relu
+  loss: bce_with_logits  # pos_weight = n_neg / n_pos on training data (32.0)
+  optimizer: adam  # lr 1e-3, batch 256, max 300 epochs, early stopping patience 20
+  threshold: best_f1_on_validation  # 0.9
 explainability:
-  outputs: [logit, embedding]  # seminar requirement; 'embedding' meaning to be confirmed with supervisor
+  outputs: [logit, embedding]  # embedding: both readings built (features -> neurons, neurons -> logit)
   background_source: training_only
-  explainers: [deepshap, kernelshap]  # plus exact Shapley (7 features) as a check
+  background_size: 100
+  explainers: [exact, kernelshap, deepshap]  # exact = own code, all 2^7 coalitions
   random_seed: 42
