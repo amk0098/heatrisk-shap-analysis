@@ -1,8 +1,7 @@
 # Shapley Analysis of a Heat-Day MLP (HeatRisk Deutschland)
 
 Practical part of the seminar talk **„Shapley-Analyse eines MLP“** (Bergische Universität Wuppertal,
-supervisor Mathias Sure, talk on 1 December 2026; theory and slides:
-[shapley-mlp-seminar](https://github.com/amk0098/shapley-mlp-seminar)).
+1 December 2026; theory and slides: [shapley-mlp-seminar](https://github.com/amk0098/shapley-mlp-seminar)).
 
 A small PyTorch MLP predicts whether **tomorrow** will be a heat day (maximum temperature ≥ 30 °C) at five German
 weather stations. Its predictions are explained with **exact Shapley values** (own implementation, all 2⁷ = 128

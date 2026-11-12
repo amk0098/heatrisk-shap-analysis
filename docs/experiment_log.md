@@ -163,8 +163,8 @@ Every reported explanation must therefore name its background.
 - **Date:** 12.11.2026
 - **Code revision:** `3d0c083`
 - **Command:** `python scripts/shap_embeddings.py`
-- **Status of the requirement:** the supervisor has not yet said which embedding analysis he means; both readings
-  were built. Same model and 100-day background as Runs 2-3.
+- **Setup:** two readings of "Shapley values on the embeddings" are analysed. Same model and 100-day background
+  as Runs 2-3.
 - **(a) features → embedding:** the 7 features are the players, each of the 8 neurons of the last hidden layer is
   explained separately (`exact_shapley_multi`, 128 coalitions, all 8 outputs at once).
 - **(b) embedding → logit:** the 8 neuron values are the players for the logit (256 coalitions); background =
