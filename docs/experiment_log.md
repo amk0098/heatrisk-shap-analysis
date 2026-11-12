@@ -82,3 +82,52 @@ coalitions; the approximation error only appears with fewer coalitions. DeepSHAP
 the contributions differently (DeepLIFT rescale rule); its largest deviations occur where ReLU neurons switch.
 On this small model KernelSHAP is only about 1.6x slower than DeepSHAP, not "slow". The false alarm is a
 sudden cool-down that today's features cannot show (no wind, pressure or front information).
+
+## Run 4 — runtime analysis (Step 8)
+
+- **Date:** 12.11.2026
+- **Code revision:** `ecfc18d`
+- **Command:** `python scripts/runtime.py`
+- **Machine:** MacBook Air, Apple M1, 8 GB RAM, macOS 15.8, 8 cores (torch uses 4 threads); Python 3.13.3,
+  torch 2.15.0, shap 0.54.1 (`outputs/runtime/hardware.txt`)
+- **Setup:** wall-clock time of the explanation only (explainer creation measured separately, < 1 ms);
+  one warm-up call per method; median of 5 / 3 / 1 repeats for ≤ 10 / ≤ 100 / 1000 days.
+  A and B on the trained model; C on untrained networks M-16-8-1 with random inputs (10 days, background 20).
+
+**A) Number of explained days** (background 100), seconds:
+
+| Days | exact | KernelSHAP | DeepSHAP |
+|---:|---:|---:|---:|
+| 1 | 0.001 | 0.003 | 0.001 |
+| 10 | 0.010 | 0.020 | 0.012 |
+| 100 | 0.075 | 0.202 | 0.111 |
+| 1000 | 0.723 | 1.885 | 1.132 |
+
+**B) Background size** (100 days), seconds:
+
+| Background | exact | KernelSHAP | DeepSHAP |
+|---:|---:|---:|---:|
+| 10 | 0.010 | 0.129 | 0.045 |
+| 50 | 0.040 | 0.166 | 0.075 |
+| 100 | 0.072 | 0.190 | 0.114 |
+| 500 | 0.355 | 0.441 | 0.467 |
+
+**C) Number of features** (random networks), seconds:
+
+| M | coalitions | exact | KernelSHAP | DeepSHAP |
+|---:|---:|---:|---:|---:|
+| 4 | 16 | 0.001 | 0.007 | 0.006 |
+| 6 | 64 | 0.002 | 0.010 | 0.006 |
+| 8 | 256 | 0.007 | 0.023 | 0.006 |
+| 10 | 1 024 | 0.026 | 0.062 | 0.006 |
+| 12 | 4 096 | 0.117 | 0.161 | 0.006 |
+| 14 | 16 384 | 0.489 | 0.161 | 0.006 |
+| 16 | 65 536 | 2.064 | 0.157 | 0.006 |
+
+**Observations:** All three methods scale linearly with the number of explained days. Exact and DeepSHAP also scale
+linearly with the background size; KernelSHAP is dominated by its per-day overhead (sampling, weighted regression)
+up to ~100 background days. With M = 7 features the exact computation is the fastest method. Its cost doubles with
+every additional feature and overtakes KernelSHAP between 12 and 14 features; KernelSHAP stays flat from M = 12 on
+because its default budget (2M + 2048 coalitions) then no longer covers all coalitions (it becomes an approximation).
+DeepSHAP is practically independent of M. The simple claim "KernelSHAP slow, DeepSHAP fast" does not hold for this
+small model; what matters is the number of features.
