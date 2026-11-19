@@ -1,5 +1,13 @@
 # Shapley Analysis of a Heat-Day MLP (HeatRisk Deutschland)
 
+This project is part of a broader seminar project on Shapley-value-based explainability of Multi-Layer Perceptrons (MLPs). For additional context, documentation, and implementation details, please refer to the following related repositories:
+
+shap-mlp-seminar – The main seminar repository, containing the presentation materials, theoretical background, research questions, and documentation.
+
+mlp-shap-pipeline – The implementation repository containing the MLP-SHAP analysis pipeline and its experimental workflow.
+
+This repository focuses on applying and evaluating SHAP-based explanations in the HeatRisk prediction project. Together, the three repositories document the theoretical foundations, technical implementation, and practical application of the seminar research.
+
 Practical part of the seminar talk **„Shapley-Analyse eines MLP“** (Bergische Universität Wuppertal,
 1 December 2026; theory and slides: [shapley-mlp-seminar](https://github.com/amk0098/shapley-mlp-seminar)).
 
@@ -72,7 +80,7 @@ git clone https://github.com/amk0098/heatrisk-deutschland ../heatrisk-deutschlan
 mkdir -p data/raw
 cp ../heatrisk-deutschland/data/raw/*.txt data/raw/
 
-python -m pytest                              # 21 tests: data pipeline, model, Shapley axioms
+python -m pytest                              # 23 tests: data pipeline, model, Shapley axioms
 python scripts/check_environment.py           # torch + shap compatibility
 python scripts/analyze_dataset.py             # Step 3: dataset analysis
 python scripts/train_mlp.py                   # Step 4: train and evaluate the MLP
