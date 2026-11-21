@@ -218,3 +218,23 @@ exception is KernelSHAP with 16 coalitions: with only 16 samples for 7 unknowns 
 numerically unstable, so rounding differences change the result (three runs: mean deviation 0.134 / 0.142 / 0.149,
 maximum 8–14). This is itself a finding: far too few coalitions make KernelSHAP not only inaccurate but unstable.
 Runtimes differ by machine and are only comparable within one run.
+
+## Run 8 — figures of the trained MLP for the final slides
+
+- **Date:** 21.11.2026
+- **Code revision:** commit that adds `scripts/mlp_figures.py`
+- **Machine:** Linux x86_64, Python 3.13, pinned packages
+- **Command:** `python scripts/mlp_figures.py` (trained model from Run 1, no Shapley computation)
+
+| Day | active neurons, layer 1 | active embedding neurons | logit | probability |
+|---|---|---|---|---|
+| München, 15.01.2025 (winter) | 5 / 16 | N2, N4, N5, N7 (≈ 10–11.5), N6 (0.23) | −32.77 | ≈ 0 |
+| München, 29.06.2025 (summer) | 11 / 16 | N0, N1, N3 | 3.29 | 0.96 |
+
+First-layer weights per feature (positive / negative, out of 16): Mittel-Temp. 10/6, Max.-Temp. 8/8, Min.-Temp.
+11/5, Dampfdruck 6/10, rel. Feuchte 4/12, Vortags-Max. 10/6, 3-Tage-Mittel 10/6.
+
+**Observations:** No feature has a single weight: every feature reaches the 16 first-layer neurons with both signs,
+and which paths count depends on which ReLUs are active on the day. The four "normal weather" embedding neurons of
+Run 6 are strongly active on the winter day and all off on the summer day, which shows the mechanism of Run 6 on two
+concrete days.
