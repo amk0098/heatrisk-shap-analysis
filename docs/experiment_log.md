@@ -222,7 +222,7 @@ Runtimes differ by machine and are only comparable within one run.
 ## Run 8 — figures of the trained MLP for the final slides
 
 - **Date:** 21.11.2026
-- **Code revision:** commit that adds `scripts/mlp_figures.py`
+- **Code revision:** `730021f`
 - **Machine:** Linux x86_64, Python 3.13, pinned packages
 - **Command:** `python scripts/mlp_figures.py` (trained model from Run 1, no Shapley computation)
 
