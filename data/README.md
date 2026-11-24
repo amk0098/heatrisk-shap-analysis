@@ -47,3 +47,9 @@ DWD marks missing values as `-999`; they are read as NaN (`src/data.py`).
 Rows without a target (missing TXK tomorrow) or without lag features (first 3 days per city) are dropped.
 Remaining NaNs in the features (at most 26 rows per split, mostly VPM/UPM) are imputed with training-period means
 before training. Details: `docs/data_audit.md`.
+
+## External: outline of Germany
+
+`external/germany_outline.geojson` is the outline of Germany from Natural Earth, 1:50m Admin 0 Countries (public
+domain, https://www.naturalearthdata.com), used only for the station map on the dataset slide
+(`scripts/station_map.py`). Station coordinates come from the DWD station list `KL_Tageswerte_Beschreibung_Stationen.txt`.

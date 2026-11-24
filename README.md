@@ -91,6 +91,7 @@ python scripts/background_sensitivity.py      # Step 9: background sensitivity
 python scripts/shap_embeddings.py             # Step 7: Shapley values of the embeddings
 python scripts/slide_figures.py               # figures at slide size for the talk
 python scripts/mlp_figures.py                 # network and weight figures of the trained MLP (final slides)
+python scripts/station_map.py                 # outline of Germany for the station map (dataset slide)
 ```
 
 Steps 5–9 and the slide figures read the model from `outputs/models/mlp.pt`; run them after `train_mlp.py`.
